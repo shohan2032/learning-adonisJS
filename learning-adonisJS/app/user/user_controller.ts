@@ -11,7 +11,7 @@ export default class UserController {
 
     return this.userService.login(payload)
   }
-  
+
   public async logout(ctx: HttpContext) {
     await ctx.auth.logout()
     return ctx.response.send({ message: 'Logged out successfully' })

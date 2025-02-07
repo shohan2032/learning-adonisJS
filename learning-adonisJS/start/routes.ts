@@ -8,9 +8,15 @@
 */
 
 import router from '@adonisjs/core/services/router'
-import '../app/post/user_routes.js'
+import '../app/user/user_routes.js'
 router.get('/', async () => {
   return {
     hello: 'world',
+  }
+})
+
+router.get('/test/:id', async ({ params }) => {
+  return {
+    message: `This is test number ${params.id}`,
   }
 })

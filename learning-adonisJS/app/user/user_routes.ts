@@ -7,4 +7,4 @@ router
     router.post('api/login', [UserController, 'login'])
     router.post('api/logout', [UserController, 'logout'])
   })
-  .prefix('user-auth')
+  .prefix('/user-auth')

@@ -589,8 +589,469 @@ stores: {
 ✅ **Secure session management** (HTTP-only, `secure` in production).  
 ✅ **Supports multiple session stores** for scalability.  
 
+# 📌**AsyncLocalStorage in AdonisJS**  
 
-# CSRF
+#### **1️⃣ Ki AsyncLocalStorage? (Sohoj Vasha)**
+**AsyncLocalStorage** ekta **Node.js er built-in API**, jar madhome **request-specific data** store kora jay, jeita **request er life cycle er moddhei thake**.  
+
+🛠 **Udaharan:**  
+Tumi jodi ekta HTTP request pathao, tokhon sei request er shathe related kichu **data temporarily store** korte parba, jar upor onno request kono effect felbe na.
+
+---
+
+#### **2️⃣ AsyncLocalStorage in AdonisJS**
+AdonisJS e **AsyncLocalStorage** mainly use kora hoy **HTTP request er context globally access korte**.  
+
+- Jodi **useAsyncLocalStorage: true** kora hoy, tahole **request-specific context** ba onno data globally access kora jay.  
+- Jodi **false** thake, tahole **context shudhu middleware ba controllers e thake**.
+
+---📌
+
+#### **3️⃣ Configuration in `app.ts`**
+Ei setting ta **`config/app.ts`** file e thake:
+
+```ts
+export const http = defineConfig({
+  generateRequestId: true,
+  allowMethodSpoofing: false,
+
+  /**
+   * Enabling async local storage will let you access HTTP context
+   * from anywhere inside your application.
+   */
+  useAsyncLocalStorage: true,
+
+  cookie: {
+    domain: '',
+    path: '/',
+    maxAge: '2h',
+    httpOnly: true,
+    secure: app.inProduction,
+    sameSite: 'lax',
+  },
+})
+```
+Ei setting **true** korle **request er context globally available** hobe.
+
+---
+
+#### **4️⃣ AsyncLocalStorage Ki Problem Solve Kore?**
+1. **Global Request Data Maintain Kora**  
+   - Middleware, Controller, Service sob jaygay same **request-specific data** access kora jay.
+   
+2. **Logging & Debugging Easy Kora**  
+   - Jodi ekta request er ID maintain korte hoy, tahole **async local storage** diye easily track kora jay.
+
+3. **Database Transaction Context Maintain Kora**  
+   - Jodi **transaction-based operation** thake, tahole sei transaction **particular request** er moddhei thakbe, onno request effect korbe na.
+
+---
+
+#### **5️⃣ Example: How to Use in AdonisJS?**
+Tumi jodi ekta middleware e request er kono data store koro, sei data pore onno jaygay **access korte chaile AsyncLocalStorage use korte paro**.
+
+🔹 **Middleware e Context Set Kora:**
+```ts
+import { AsyncLocalStorage } from 'node:async_hooks'
+
+const storage = new AsyncLocalStorage()
+
+export default class ContextMiddleware {
+  async handle({ request }, next) {
+    storage.run(new Map(), async () => {
+      storage.getStore()?.set('requestId', request.id)
+      await next()
+    })
+  }
+}
+```
+🔹 **Controller e Access Kora:**
+```ts
+import { storage } from '../middlewares/ContextMiddleware'
+
+export default class TestController {
+  async index() {
+    const requestId = storage.getStore()?.get('requestId')
+    return `Request ID: ${requestId}`
+  }
+}
+```
+**Output:**  
+Request ID: `some-unique-id`
+
+---
+
+#### **6️⃣ Keno AsyncLocalStorage Useful AdonisJS e?**
+| **Feature** | **With AsyncLocalStorage** | **Without AsyncLocalStorage** |
+|------------|--------------------------|-----------------------------|
+| Context Maintain | Request-specific context globally accessable | Context Middleware & Controller e limit thake |
+| Debugging | Easy tracking using request ID | Manually maintain korte hoy |
+| Transaction Safety | Same request er moddhei database transaction maintain kora jay | Alada request e transaction fail korte pare |
+
+---
+
+### **🚀 TL;DR (Short Summary)**
+- **AsyncLocalStorage** AdonisJS e use kora hoy **request-specific data globally maintain korte**.
+- `config/app.ts` e `useAsyncLocalStorage: true` korle request er context **global** vabe access kora jay.
+- Mainly **logging, debugging, database transaction** handle korte khub useful.
+
+### **📌 HTTP Context in AdonisJS**  
+#### **1️⃣ Ki HTTP Context? (Sohoj Vasha)**
+AdonisJS e **HTTP Context** ekta **object**, jar moddhe **ekta request er shob relevant data thake**.  
+Ei object ta **route handlers, controllers, middleware** theke access kora jay.  
+
+📌 **Think of it like a toolbox**, jei request ashe, sei request er **URL, headers, cookies, auth info, session, response object**—shob ekhan theke access kora jay.
+
+---
+
+### **2️⃣ HTTP Context Ki Ki Thake?**
+AdonisJS er **`HttpContext`** object e anek built-in properties thake:
+
+| **Property** | **Use Case** |
+|-------------|-------------|
+| **request** | Request object, e.g., `ctx.request.body()` |
+| **response** | Response object, e.g., `ctx.response.status(200).send('OK')` |
+| **auth** | Authentication data, e.g., `ctx.auth.user` |
+| **session** | Session management, e.g., `ctx.session.put('key', 'value')` |
+| **logger** | Logger access, e.g., `ctx.logger.info('Log this!')` |
+| **view** | View rendering, e.g., `ctx.view.render('welcome')` |
+| **params** | Route parameters, e.g., `ctx.params.id` |
+| **routeKey** | Current route key name |
+
+---
+
+### **3️⃣ Kothay Kothay HTTP Context Use Kora Jay?**
+1. **Controller Method e**
+```ts
+import type { HttpContext } from '@adonisjs/core/http'
+
+export default class UserController {
+  async show(ctx: HttpContext) {
+    return `User ID: ${ctx.params.id}`
+  }
+}
+```
+🔹 **Explanation:** `ctx.params.id` er madhome request theke user ID access kora hocche.
+
+---
+
+2. **Middleware e**
+```ts
+import type { HttpContext } from '@adonisjs/core/http'
+
+export default class AuthMiddleware {
+  async handle(ctx: HttpContext, next: () => Promise<void>) {
+    if (!ctx.auth.isAuthenticated) {
+      return ctx.response.status(401).send('Unauthorized')
+    }
+    await next()
+  }
+}
+```
+🔹 **Explanation:** Middleware check korche je user authenticated ki na (`ctx.auth.isAuthenticated`).
+
+---
+
+3. **Route Handler e Direct Use**
+```ts
+import type { HttpContext } from '@adonisjs/core/http'
+
+export default async function handler(ctx: HttpContext) {
+  return `Your IP is: ${ctx.request.ip()}`
+}
+```
+🔹 **Explanation:** `ctx.request.ip()` use kore client er IP address return korche.
+
+---
+
+### **4️⃣ HTTP Context Keno Important?**
+✅ **Same Request er Under e Context Maintain Kora**  
+➡ Request er modhye **user info, session data, request body** maintain kora jay.  
+
+✅ **Middleware & Controllers e Unified Data Access**  
+➡ Same `ctx` object use kore authentication, logging, and debugging easy kora jay.  
+
+✅ **Async Request Maintain Kora**  
+➡ Jodi **async process hoy**, tahole **HTTP Context** maintain thake (if AsyncLocalStorage is enabled).
+
+---
+
+### **5️⃣ Example: HTTP Context Full Usage**
+```ts
+import type { HttpContext } from '@adonisjs/core/http'
+
+export default class ProfileController {
+  async index(ctx: HttpContext) {
+    const user = ctx.auth.user
+    const userAgent = ctx.request.header('User-Agent')
+    
+    return ctx.response.json({
+      message: `Hello, ${user.username}!`,
+      ip: ctx.request.ip(),
+      browser: userAgent,
+    })
+  }
+}
+```
+🔹 **Explanation:**  
+1. `ctx.auth.user` -> Logged-in user info fetch kore  
+2. `ctx.request.header('User-Agent')` -> Browser info fetch kore  
+3. `ctx.response.json({...})` -> JSON format e response pathay  
+
+---
+
+### **🚀 TL;DR (Short Summary)**
+- **HttpContext** ekta **special object**, jei request er shob information store kore.
+- **Middleware, Controller, Route handler theke easily access kora jay**.
+- **Request info, authentication, session, response, params shob ekhan theke access kora jay**.
+
+
+### **📌 Assembler Hooks in AdonisJS**  
+
+#### **1️⃣ Ki Assembler Hooks?**
+**Assembler Hooks** AdonisJS er ekta **advanced feature**, jeta `@adonisjs/core` er moddhe **models er data transformation handle** korte use kora hoy.
+
+👉 **Think of it like a filter** je data ke modify kore **before or after** database theke read/write hoy.
+
+---
+
+### **2️⃣ Keno Assembler Hooks Use Kora Hoy?**
+✅ **Database theke data anar pore modify korte**  
+✅ **Data save korar age modify korte**  
+✅ **Computed fields (extra fields je database e nei) add korte**  
+
+---
+
+### **3️⃣ Example: Assembler Hooks**
+#### **🔹 Before Returning Data**
+```ts
+import { BaseModel, column, beforeFetch, afterFind } from '@adonisjs/lucid/orm'
+
+export default class User extends BaseModel {
+  @column()
+  public name: string
+
+  @column()
+  public email: string
+
+  // Before fetching users, modify query
+  @beforeFetch()
+  public static addDefaultScope(query) {
+    query.select('id', 'name', 'email') // Limit fields
+  }
+
+  // After finding a user, modify data
+  @afterFind()
+  public static async maskEmail(user: User) {
+    user.email = 'hidden@example.com' // Mask email for privacy
+  }
+}
+```
+🔹 **Explanation:**  
+- **`@beforeFetch()`** – Query modify kore fetch er age (e.g., unnecessary fields na ana)  
+- **`@afterFind()`** – User object modify kore fetch er pore (e.g., email hide kora)
+
+---
+
+#### **🔹 Before Saving Data**
+```ts
+import { BaseModel, column, beforeSave } from '@adonisjs/lucid/orm'
+import Hash from '@adonisjs/core/hash'
+
+export default class User extends BaseModel {
+  @column()
+  public password: string
+
+  // Before saving a user, hash the password
+  @beforeSave()
+  public static async hashPassword(user: User) {
+    if (user.$dirty.password) {
+      user.password = await Hash.make(user.password)
+    }
+  }
+}
+```
+🔹 **Explanation:**  
+- **`@beforeSave()`** – Password hash kore save er age  
+- **`user.$dirty.password`** – Jodi password change hoy, taholei hash kora hobe  
+
+---
+
+### **4️⃣ Commonly Used Assembler Hooks**
+| **Hook** | **When It Runs** | **Use Case** |
+|----------|----------------|--------------|
+| `@beforeFetch()` | Query execution er age | Query modify kora (e.g., only specific fields select kora) |
+| `@afterFind()` | Ekta single model fetch er pore | Data modify kora (e.g., sensitive info hide kora) |
+| `@beforeSave()` | Model database e save howar age | Password hashing, data validation |
+| `@afterSave()` | Model database e save howar pore | Logging, cache update |
+| `@beforeDelete()` | Delete howar age | Soft delete implement kora |
+| `@afterDelete()` | Delete howar pore | Audit logs maintain kora |
+
+---
+
+### **🚀 TL;DR (Short Summary)**
+- **Assembler Hooks AdonisJS er ORM er ekta part**, jehetu data modify korte use kora hoy **before or after** database query execution.
+- **Commonly used hooks:** `@beforeFetch()`, `@afterFind()`, `@beforeSave()`, `@afterSave()`, `@beforeDelete()`, `@afterDelete()`.
+- **Use cases:** Query optimize kora, password hash kora, sensitive info hide kora, soft delete implement kora.
+
+### **Router**
+
+The router module is responsible for defining the endpoints of your application, which are known as routes. A route should define a handler responsible for handling the request. The handler can be a closure or reference to a controller.
+[Documentation](https://docs.adonisjs.com/guides/basics/routing)
+
+### **Controllers**
+
+Controllers are JavaScript classes that you bind to a route to handle the HTTP requests. Controllers act as an organization layer and help you divide the business logic of your application inside different files/classes.
+
+### **HttpContext**
+
+AdonisJS creates an instance of the HttpContext class for every incoming HTTP request. The HttpContext (aka ctx) carries the information like the request body, headers, authenticated user, etc, for a given request.
+
+### **Middleware**
+
+The middleware pipeline in AdonisJS is an implementation of Chain of Responsibility design pattern. You can use middleware to intercept HTTP requests and respond to them before they reach the route handler.
+
+
+### ✅ **Backend Validation, Authentication, and Authorization Serial with Example**  
+
+In a backend system, the typical flow is:  
+1. **Validation → Authentication → Authorization**  
+
+Let’s break this down with an example of a **To-Do App API** where users can create tasks.  
+
+---
+
+### 🚀 **1️⃣ Validation (Checking Data Accuracy)**  
+
+- **What?**  
+  Ensures the incoming data (like email, password, etc.) is correct in format and meets the rules.  
+- **When?**  
+  First step before any database or authentication check.  
+- **Example:**  
+  When a user signs up:  
+  ```json
+  {
+    "email": "user@example.com",
+    "password": "pass1234"
+  }
+  ```  
+  ✅ Checks:  
+  - Is the email valid? (Format: `user@example.com`)  
+  - Is the password strong enough? (Minimum 8 characters, etc.)  
+
+  **Code Example (AdonisJS Validator):**  
+  ```javascript
+  const { schema, rules } = require('@ioc:Adonis/Core/Validator')
+
+  const validationSchema = schema.create({
+    email: schema.string({}, [rules.email()]),
+    password: schema.string({}, [rules.minLength(8)])
+  })
+
+  await request.validate({ schema: validationSchema })
+  ```  
+
+---
+
+### 🔐 **2️⃣ Authentication (Are You Who You Claim to Be?)**  
+
+- **What?**  
+  Verifies the user's identity using credentials (email & password).  
+- **When?**  
+  After validation, to ensure the request comes from a real user.  
+- **Example:**  
+  After successful validation, check:  
+  - Does the user exist in the database?  
+  - Does the password match?  
+
+  **Code Example (AdonisJS Auth):**  
+  ```javascript
+  const user = await User.findBy('email', request.input('email'))
+  if (user && await Hash.verify(user.password, request.input('password'))) {
+    const token = await auth.use('api').generate(user)
+    return { token }
+  } else {
+    return response.unauthorized('Invalid credentials')
+  }
+  ```  
+
+---
+
+### ✅ **3️⃣ Authorization (Do You Have Permission?)**  
+
+- **What?**  
+  Checks if the authenticated user has permission to perform an action.  
+- **When?**  
+  After authentication, especially for sensitive routes like deleting or updating tasks.  
+- **Example:**  
+  User wants to delete a to-do task:  
+  - Does the task belong to the user?  
+  - Is the user an admin (if deleting other users’ tasks)?  
+
+  **Code Example (AdonisJS Middleware):**  
+  ```javascript
+  async deleteTask({ auth, params, response }) {
+    const task = await Task.find(params.id)
+    if (task.user_id !== auth.user.id) {
+      return response.unauthorized('Not allowed to delete this task')
+    }
+    await task.delete()
+    return { message: 'Task deleted successfully' }
+  }
+  ```  
+
+---
+
+### 🗂️ **Complete Flow Example**  
+
+1. **POST /login:**  
+   - ✅ Validation: Check if email and password are provided correctly.  
+   - 🔐 Authentication: Verify credentials and generate token.  
+
+2. **DELETE /tasks/:id:**  
+   - 🔐 Authentication: Verify token (user is logged in).  
+   - ✅ Validation: Check if the task ID is valid.  
+   - 🚫 Authorization: Ensure the task belongs to the user.  
+
+---
+
+### ⚡ **Summary**  
+1. **Validation:** Data is correct?  
+2. **Authentication:** User is real?  
+3. **Authorization:** User has permission?  
+
+Let me know if you want code for a specific case! 🚀
+
+### **Global Exception handler**
+
+Creating the HttpContext:<br>
+As the first step, the server module creates an instance of the HttpContext class and passes it as a reference to the middleware, route handlers, and the global exception handler.
+
+If you have enabled the AsyncLocalStorage, then the same instance is shared as the local storage state.
+
+Executing server middleware stack:<br>
+Next, the middleware from the server middleware stack are executed. These middleware can intercept and respond to the request before it reaches the route handler.
+
+Also, every HTTP request goes through the server middleware stack, even if you have not defined any router for the given endpoint. This allows server middleware to add functionality to an app without relying on the routing system.
+
+Finding the matching route:<br>
+If a server middleware does not end the request, we look for a matching route for the req.url property. The request is aborted with a 404 - Not found exception when no matching route exists. Otherwise, we continue with the request.
+
+Executing the route middleware:
+Once there is a matching route, we execute the router global middleware and the named middleware stack. Again, middleware can intercept the request before it reaches the route handler.
+
+Executing the route handler:<br>
+As the final step, the request reaches the route handler and returns to the client with a response.
+
+Suppose an exception is raised during any step in the process. In that case, the request will be handed over to the global exception handler, who is responsible for converting the exception to a response.
+
+Serializing response:<br>
+Once you define the response body using the response.send method or by returning a value from the route handler, we begin the response serialization process and set the appropriate headers.
+
+### **HTTP request lifecycle**
+As the first step, the server module creates an instance of the HttpContext class and passes it as a reference to the middleware, route handlers, and the global exception handler.   Middleware --> route handlers(controller) --> global exeption handler
+
+# **CSRF**
 A **CSRF (Cross-Site Request Forgery) token** is a security measure used to prevent unauthorized commands from being executed on behalf of an authenticated user. It is commonly implemented in web applications to protect against CSRF attacks.
 
 ### 🔹 **How CSRF Attacks Work**
@@ -722,3 +1183,8 @@ exceptRoutes: ['/api/*']
 ✔ CSRF tokens are stored in cookies and must be included in protected requests.  
 ✔ You can **enable, disable, or customize** CSRF settings easily in `config/shield.ts`.  
 ✔ Frontend applications can fetch and send CSRF tokens via `XSRF-TOKEN`.  
+
+
+# Commands
+- node ace make:model model_name (to create a new model)
+- node ace make:migration model_name (it will create the table in database)
