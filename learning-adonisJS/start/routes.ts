@@ -9,6 +9,8 @@
 
 import router from '@adonisjs/core/services/router'
 import '../app/user/user_routes.js'
+import '../app/post/post_routes.js'
+import '../app/comment/comment_routes.js'
 router.get('/', async () => {
   return {
     hello: 'world',

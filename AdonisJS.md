@@ -1,6 +1,7 @@
 # AdonisJS intstallation 
 - Create a project and get prompted for all options
 - npm init adonisjs@latest project_name
+- [Documentation](https://docs.adonisjs.com/guides/preface/introduction)
 ## Run ESLint
 npm run lint
 
@@ -1187,4 +1188,74 @@ exceptRoutes: ['/api/*']
 
 # Commands
 - node ace make:model model_name (to create a new model)
-- node ace make:migration model_name (it will create the table in database)
+- node ace make:migration model_name (it will create files in migration directory under database directory)
+- node ace migration:run (it will create all the tables in database)  
+
+In AdonisJS, the **query string** and **request body** (often referred to as **query body**) are both used to send data from the client to the server, but they serve different purposes and are used in different contexts. Here's the key difference:
+
+### 📌 **1. Query String**  
+- **Definition:** Data appended to the URL after the `?` symbol.  
+- **Usage:** Typically used for filtering, sorting, pagination, or any data retrieval in `GET` requests.  
+- **Example URL:**  
+  ```
+  GET /users?name=John&age=25
+  ```  
+- **Access in AdonisJS:**  
+  ```javascript
+  const name = request.qs().name   // 'John'
+  const age = request.qs().age     // '25'
+  ```  
+  - `request.qs()` returns an object with all query parameters.
+
+---
+
+### 📌 **2. Request Body (Query Body)**  
+- **Definition:** Data sent within the body of an HTTP request, typically in `POST`, `PUT`, or `PATCH` requests.  
+- **Usage:** Used for sending sensitive or large amounts of data like user credentials, form submissions, or JSON payloads.  
+- **Example Request:**  
+  ```http
+  POST /users
+  Content-Type: application/json
+  
+  {
+    "username": "johndoe",
+    "email": "john@example.com",
+    "password": "securepassword"
+  }
+  ```  
+- **Access in AdonisJS:**  
+  ```javascript
+  const data = request.body()
+  console.log(data.username) // 'johndoe'
+  console.log(data.email)    // 'john@example.com'
+  ```  
+  - `request.body()` returns the parsed body content.
+
+---
+
+### 🚀 **Key Differences**
+
+| **Aspect**         | **Query String**                             | **Request Body**                               |
+|--------------------|----------------------------------------------|------------------------------------------------|
+| **Location**        | Appended to the URL (`?key=value`)           | Inside the request payload                     |
+| **HTTP Methods**    | Mostly used with `GET`                       | Used with `POST`, `PUT`, `PATCH`, `DELETE`     |
+| **Data Size**       | Limited (depends on browser/server limits)   | Can handle large data                          |
+| **Security**        | Visible in URL (less secure)                 | Hidden from URL (more secure)                  |
+| **Use Cases**       | Filtering, pagination, search queries        | User login, form submissions, data updates     |
+
+---
+
+If you're building an API:
+- **Use Query Strings** for **GET** requests (retrieving data).
+- **Use Request Body** for **POST/PUT/PATCH** requests (sending data).
+
+
+query -> service
+service -> controller
+validator -> controller
+controller -> router
+
+query -> service -> validator -> controller -> router
+
+get -> for fetching data. Can get the request data from ctx params
+post -> for CRUD operations. Can get the request data from ctx body

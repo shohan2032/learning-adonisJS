@@ -1,0 +1,63 @@
+import { rules, schema } from '@adonisjs/validator'
+import Item from '#models/Item'
+
+const db: {
+  name: string
+}[] = [
+  {
+    name: 'item 1',
+  },
+  {
+    name: 'item 2',
+  },
+]
+
+router.get('/item-list', () => {
+  return Item.query().paginate(1, 10)
+})
+
+router.get('/item-get', (ctx) => {
+  const payload = ctx.request.qs()
+  const index = db.findIndex((item) => {
+    return item.name === payload.id
+  })
+  return db[index]
+})
+
+router.post('/item-create', async (ctx) => {
+  const payload = await ctx.request.validate({
+    schema: schema.create({
+      name: schema.string([
+        rules.minLength(6),
+        rules.maxLength(6),
+      ]),
+    }),
+    messages: {
+      'name.required': 'Name is required',
+      'name.minLength': 'Name must be at least 6 characters',
+      'name.maxLength': 'Name must be at most 6 characters',
+    },
+  })
+  const item = await Item.create(payload)
+  return item
+})
+
+router.post('/item-update', (ctx) => {
+  const payload = ctx.request.body()
+  const index = db.findIndex((item) => {
+    return item.name === payload.id
+  })
+  db[index] = {
+    name: payload.name,
+  }
+  return db
+})
+
+router.post('/item-delete', (ctx) => {
+  const payload = ctx.request.body()
+  const index = db.findIndex((item) => {
+    return item.name === payload.id
+  })
+  db.splice(index, 1)
+  return db
+})

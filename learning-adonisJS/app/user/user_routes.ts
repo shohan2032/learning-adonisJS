@@ -6,5 +6,6 @@ router
   .group(() => {
     router.post('api/login', [UserController, 'login'])
     router.post('api/logout', [UserController, 'logout'])
+    router.post('api/register', [UserController, 'register'])
   })
   .prefix('/user-auth')
