@@ -15,3 +15,16 @@ export const UpdateCommentValidator = vine.compile(
     content: vine.string().trim(),
   })
 )
+
+export const DeleteCommentValidator = vine.compile(
+  vine.object({
+    id: vine.number(),
+    user_id: vine.number(),
+  })
+)
+
+export const AllCommentsByPostIdValidator = vine.compile(
+  vine.object({
+    post_id: vine.number(),
+  })
+)

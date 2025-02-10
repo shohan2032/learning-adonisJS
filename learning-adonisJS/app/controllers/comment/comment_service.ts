@@ -12,14 +12,27 @@ export default class CommentService {
   }
   async updateComment(data: { id: number; user_id: number; content: string }) {
     const comment = await this.commentQuery.GetCommentByCommentId(data.id)
-    console.log(comment)
+    if (!comment) {
+      throw new Exception('Comment not found')
+    }
     if (comment?.user_id !== data.user_id) {
       throw new Exception('Unauthorized to update this comment')
     }
-    // return comment
-    // if (comment.user) {
-    //   throw new Exception('Comment not found')
-    // }
     return await this.commentQuery.UpdateComment(data)
+  }
+
+  async deleteComment(data: { id: number; user_id: number }) {
+    const comment = await this.commentQuery.GetCommentByCommentId(data.id)
+    if (!comment) {
+      throw new Exception('Comment not found')
+    }
+    if (comment?.user_id !== data.user_id) {
+      throw new Exception('Unauthorized to delete this comment')
+    }
+    return await this.commentQuery.DeleteComment(data)
+  }
+
+  async allCommentsByPostId(data: { post_id: number }) {
+    return await this.commentQuery.GetCommentsByPostId(data.post_id)
   }
 }

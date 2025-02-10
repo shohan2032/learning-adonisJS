@@ -21,4 +21,9 @@ export default class UserController {
     const newUser = await this.userService.register(payload)
     return response.send(newUser)
   }
+
+  public async usersWithMostPostCount({ response }: HttpContext) {
+    const users = await this.userService.getUsersWithMostPostCount()
+    return response.send(users)
+  }
 }

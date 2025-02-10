@@ -13,6 +13,10 @@ export default class PostService {
     return await this.postQuery.GetAllPosts()
   }
 
+  async getPostsWithStats() {
+    return await this.postQuery.GetPostsWithStats()
+  }
+
   async getPostsByUserId(userId: number) {
     return await this.postQuery.GetPostsByUserId(userId)
   }

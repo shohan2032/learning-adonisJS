@@ -2,7 +2,6 @@ import { HttpContext } from '@adonisjs/core/http'
 import {
   GetPostsByUserIdValidator,
   CreatePostValidator,
-  UpdatePostValidator,
   DeletePostValidator,
 } from './post_validator.js'
 import PostService from './post_service.js'
@@ -10,6 +9,10 @@ export default class PostController {
   private postService: PostService
   constructor() {
     this.postService = new PostService()
+  }
+  public async postsWithStats(ctx: HttpContext) {
+    const posts = await this.postService.getPostsWithStats()
+    return ctx.response.send(posts)
   }
 
   public async createPost({ request, response }: HttpContext) {
@@ -21,10 +24,12 @@ export default class PostController {
     return response.send(post)
   }
   public async updatePost({ request, response }: HttpContext) {
-    console.log(request.qs())
-    request.all().id = request.param('id')
-    const payload = await request.validateUsing(UpdatePostValidator)
-    const post = await this.postService.updatePost(payload)
+    const data = {
+      id: request.body().id,
+      content: request.body().content,
+    }
+    console.log(data)
+    const post = await this.postService.updatePost(data)
     return response.send(post)
   }
   public async deletePost({ request, response }: HttpContext) {

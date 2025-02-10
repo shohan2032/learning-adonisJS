@@ -1,7 +1,13 @@
 import { DateTime } from 'luxon'
-import { BaseModel, column } from '@adonisjs/lucid/orm'
+import { BaseModel, belongsTo, column, hasMany } from '@adonisjs/lucid/orm'
+import User from './user.js'
+import type { BelongsTo, HasMany } from '@adonisjs/lucid/types/relations'
+import Post from './post.js'
+import Reply from './reply.js'
+import Reaction from './reaction.js'
 
 export default class Comment extends BaseModel {
+  serializeExtras = true
   @column({ isPrimary: true })
   declare id: number
 
@@ -16,4 +22,21 @@ export default class Comment extends BaseModel {
 
   @column.dateTime({ autoCreate: true })
   declare createdAt: DateTime
+
+  @belongsTo(() => User, {
+    foreignKey: 'user_id',
+  })
+  declare user: BelongsTo<typeof User>
+
+  @belongsTo(() => Post)
+  declare post: BelongsTo<typeof Post>
+
+  @hasMany(() => Reply)
+  declare replies: HasMany<typeof Reply>
+
+  @hasMany(() => Reaction, {
+    foreignKey: 'entity_id',
+    // onQuery: (query) => query.where('entity_type', 'comment')
+  })
+  declare reactions: HasMany<typeof Reaction>
 }

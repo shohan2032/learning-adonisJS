@@ -25,4 +25,9 @@ export default class Userservice {
     }
     return await this.userQuery.RegisterQuery(data)
   }
+
+  async getUsersWithMostPostCount() {
+    const users = await this.userQuery.getUsersWithMostPostCountQuery()
+    return users
+  }
 }
