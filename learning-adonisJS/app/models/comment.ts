@@ -11,6 +11,7 @@ export default class Comment extends BaseModel {
   @column({ isPrimary: true })
   declare id: number
 
+  // Foreign key linking the comment to a post
   @column()
   declare post_id: number
 
@@ -23,20 +24,35 @@ export default class Comment extends BaseModel {
   @column.dateTime({ autoCreate: true })
   declare createdAt: DateTime
 
+  // Relationships
+  // 🔗 Each comment belongs to one user.
+  // comments.user_id refers to users.id
   @belongsTo(() => User, {
     foreignKey: 'user_id',
+    localKey: 'id',
   })
   declare user: BelongsTo<typeof User>
 
-  @belongsTo(() => Post)
+  // 🔗 Each comment belongs to one post.
+  // comments.post_id refers to posts.id
+  @belongsTo(() => Post, {
+    foreignKey: 'post_id',
+    localKey: 'id',
+  })
   declare post: BelongsTo<typeof Post>
 
-  @hasMany(() => Reply)
+  // 🔗 A comment can have many replies.
+  // replies.comment_id refers to comments.id
+  @hasMany(() => Reply, {
+    localKey: 'id',
+    foreignKey: 'comment_id',
+  })
   declare replies: HasMany<typeof Reply>
 
+  // 🔗 A comment can have many reactions.
+  // reactions.entity_id refers to comments.id
   @hasMany(() => Reaction, {
     foreignKey: 'entity_id',
-    // onQuery: (query) => query.where('entity_type', 'comment')
   })
   declare reactions: HasMany<typeof Reaction>
 }

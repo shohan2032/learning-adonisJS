@@ -21,8 +21,15 @@ export default class PostService {
     return await this.postQuery.GetPostsByUserId(userId)
   }
 
-  async updatePost(data: { id: number; content: string }) {
-    return await this.postQuery.UpdatePost(data)
+  async updatePost(data: { id: number; user_id: number; content: string }) {
+    const post = await this.postQuery.GetPostByPostId(data.id)
+    if (!post) {
+      throw new Exception('Post not found')
+    }
+    if (post?.user_id !== data.user_id) {
+      throw new Exception('Unauthorized to update this post')
+    }
+    return await this.postQuery.UpdatePost(data.id, data.content)
   }
 
   async deletePost(data: { id: number }) {

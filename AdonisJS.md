@@ -1495,4 +1495,24 @@ const posts = await Post.query()
 // add this line in the model to get the meta data
 serializeExtras = true
 
+// @hasMany -> one to many relationship
+  this is in user model
+  @hasMany(() => Post, {
+    foreignKey: 'user_id',
+  })
+Here, one user can have many posts. user_id of user model is the foreign key of primary key of post model
+
+//
+
 ```
+
+## 🔑 **Key Differences Between `hasMany` and `belongsTo`**
+
+| **Aspect**       | **`hasMany`**                         | **`belongsTo`**                  |
+| :--------------- | :------------------------------------ | :------------------------------- |
+| **Definition**   | One record relates to many others     | One record belongs to another    |
+| **Where is FK?** | Foreign key is in the **other model** | Foreign key is in **this model** |
+| **Example**      | A user has many posts                 | A post belongs to a user         |
+| **Foreign Key**  | Defined in the related model          | Defined in the current model     |
+
+---

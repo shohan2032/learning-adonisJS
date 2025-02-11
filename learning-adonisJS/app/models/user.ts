@@ -21,20 +21,37 @@ export default class User extends BaseModel {
   @column()
   declare email: string
 
-  @column({ serializeAs: null })
+  @column({ serializeAs: null }) // Password (hidden from API responses)
   declare password: string
 
+  // Relationships
+
+  // one to many relationship
+  // 🔗 One user can have many posts.
+  // posts.user_id refers to users.id
   @hasMany(() => Post, {
     foreignKey: 'user_id',
   })
   declare posts: HasMany<typeof Post>
 
-  @hasMany(() => Comment)
+  // 🔗 One user can write many comments.
+  // comments.user_id refers to users.id
+  @hasMany(() => Comment, {
+    foreignKey: 'user_id',
+  })
   declare comments: HasMany<typeof Comment>
 
-  @hasMany(() => Reply)
+  // 🔗 One user can post many replies.
+  // replies.user_id refers to users.id
+  @hasMany(() => Reply, {
+    foreignKey: 'user_id',
+  })
   declare replies: HasMany<typeof Reply>
 
-  @hasMany(() => Reaction)
+  // �� One user can react to many entities.
+  // reactions.user_id refers to users.id
+  @hasMany(() => Reaction, {
+    foreignKey: 'user_id',
+  })
   declare reactions: HasMany<typeof Reaction>
 }

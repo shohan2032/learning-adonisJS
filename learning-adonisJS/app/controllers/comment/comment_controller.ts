@@ -18,24 +18,24 @@ export default class CommentController {
     return response.send(comments)
   }
   public async createComment({ response, request }: HttpContext) {
-    request.all().post_id = request.param('postId')
-    request.all().user_id = request.param('userId')
+    request.all().post_id = request.body().postId
+    request.all().user_id = request.body().userId
     const payload = await request.validateUsing(CreateCommentValidator)
     const comment = await this.commentService.createComment(payload)
     return response.send(comment)
   }
 
   public async updateComment({ response, request }: HttpContext) {
-    request.all().id = request.param('commentId')
-    request.all().user_id = request.param('userId')
+    request.all().id = request.body().commentId
+    request.all().user_id = request.body().userId
     const payload = await request.validateUsing(UpdateCommentValidator)
     const comment = await this.commentService.updateComment(payload)
     return response.send(comment)
   }
 
   public async deleteComment({ response, request }: HttpContext) {
-    request.all().id = request.param('commentId')
-    request.all().user_id = request.param('userId')
+    request.all().id = request.body().commentId
+    request.all().user_id = request.body().userId
     const payload = await request.validateUsing(DeleteCommentValidator)
     await this.commentService.deleteComment(payload)
     return response.send({ message: 'Comment deleted successfully' })

@@ -9,14 +9,16 @@ export default class PostQuery {
   }
   public async GetPostsWithStats() {
     const posts = await Post.query()
-      .select('id', 'content', 'user_id')
+      // .select('id', 'content', 'user_id')
       .preload('user', (query) => {
         query.select('id', 'username')
       })
       .withCount('reactions', (query) => {
-        query.where('entity_type', 'post')
+        query.where('entity_type', 'post').as('total_reactions')
       })
-      .withCount('comments')
+      .withCount('comments', (query) => {
+        query.as('total_comments')
+      })
     return posts
   }
   public async GetPostsByUserId(userId: number) {
@@ -24,14 +26,14 @@ export default class PostQuery {
   }
 
   public async GetPostByPostId(postId: number) {
-    return await Post.query().where('id', postId)
+    return await Post.query().where('id', postId).first()
   }
 
-  public async UpdatePost(data: { id: number; content: string }) {
+  public async UpdatePost(id: number, content: string) {
     // this one is not recommended by lucid documentation
     // return await Post.query().update({ content: data.content }).where('id', data.id)
-    const post = await Post.findOrFail(data.id)
-    post.content = data.content
+    const post = await Post.findOrFail(id)
+    post.content = content
     await post.save()
     return post
   }

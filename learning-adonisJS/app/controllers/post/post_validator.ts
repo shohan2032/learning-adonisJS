@@ -16,6 +16,7 @@ export const CreatePostValidator = vine.compile(
 export const UpdatePostValidator = vine.compile(
   vine.object({
     id: vine.number(),
+    user_id: vine.number(),
     content: vine.string().minLength(5).maxLength(200),
   })
 )
@@ -23,5 +24,6 @@ export const UpdatePostValidator = vine.compile(
 export const DeletePostValidator = vine.compile(
   vine.object({
     id: vine.number(),
+    user_id: vine.number(),
   })
 )

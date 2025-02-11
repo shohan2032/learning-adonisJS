@@ -16,17 +16,11 @@ export default class UserQuery {
   }
 
   public async getUsersWithMostPostCountQuery() {
-    // const users = User.query()
-    //   .select('users.id', 'users.username')
-    //   .leftJoin('posts', 'users.id', 'posts.user_id')
-    //   .groupBy('users.id', 'users.username')
-    //   .countDistinct('posts.id as total_posts')
-    //   .orderBy('total_posts', 'desc')
-    //   .pojo()
     const users = await User.query()
       .select('id', 'username')
       .withCount('posts')
       .orderBy('posts_count', 'desc')
+
     return users
   }
 }

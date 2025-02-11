@@ -21,17 +21,14 @@ export default class CommentQuery {
   }
 
   public async GetCommentsByPostId(post_id: number) {
-    // return await Comment.query().where('post_id', post_id)
     const comments = await Comment.query()
-      .select('id', 'user_id')
       .where('post_id', post_id)
       .preload('user', (query) => {
-        query.select('id', 'username')
+        query.select('username')
       })
       .withCount('reactions', (query) => {
-        query.where('entity_type', 'comment')
+        query.where('entity_type', 'comment').as('total_reactions')
       })
-      .where('post_id', post_id)
 
     return comments
   }
