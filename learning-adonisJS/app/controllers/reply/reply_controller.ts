@@ -19,9 +19,9 @@ export default class ReplyController {
   }
 
   public async getRepliesByCommentId({ response, request }: HttpContext) {
-    request.all().comment_id = request.param('commentId')
+    // request.all().comment_id = request.param('commentId')
     const payload = await request.validateUsing(GetRepliesByCommentIdValidator)
-    const replies = await this.replyService.getRepliesByCommentId(payload.comment_id)
+    const replies = await this.replyService.getRepliesByCommentId(payload.commentId)
     return response.send(replies)
   }
 

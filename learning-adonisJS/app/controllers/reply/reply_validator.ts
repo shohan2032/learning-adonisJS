@@ -10,7 +10,7 @@ export const CreateReplyValidator = vine.compile(
 
 export const GetRepliesByCommentIdValidator = vine.compile(
   vine.object({
-    comment_id: vine.number(),
+    commentId: vine.number(),
   })
 )
 

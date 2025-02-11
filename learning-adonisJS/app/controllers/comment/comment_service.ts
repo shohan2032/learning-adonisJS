@@ -32,7 +32,7 @@ export default class CommentService {
     return await this.commentQuery.DeleteComment(data)
   }
 
-  async allCommentsByPostId(data: { post_id: number }) {
-    return await this.commentQuery.GetCommentsByPostId(data.post_id)
+  async allCommentsByPostId(data: { postId: number }) {
+    return await this.commentQuery.GetCommentsByPostId(data.postId)
   }
 }

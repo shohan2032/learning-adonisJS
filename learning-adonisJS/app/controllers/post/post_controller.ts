@@ -41,7 +41,8 @@ export default class PostController {
   }
 
   public async userPosts({ request, response }: HttpContext) {
-    request.all().userId = request.param('userId')
+    // console.log(request.all().userId)
+    // request.all().userId = request.param('userId')
     const payload = await request.validateUsing(GetPostsByUserIdValidator)
     const posts = await this.postService.getPostsByUserId(payload.userId)
     return response.send(posts)

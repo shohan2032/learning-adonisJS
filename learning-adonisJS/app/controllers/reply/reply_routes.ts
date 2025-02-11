@@ -4,7 +4,7 @@ const ReplyController = () => import('./reply_controller.js')
 
 router
   .group(() => {
-    router.get('/all-replies/:commentId', [ReplyController, 'getRepliesByCommentId'])
+    router.get('/all-replies', [ReplyController, 'getRepliesByCommentId'])
     router.post('/create-reply', [ReplyController, 'createReply'])
     router.post('/delete-reply', [ReplyController, 'deleteReply'])
     router.post('/update-reply', [ReplyController, 'updateReply'])

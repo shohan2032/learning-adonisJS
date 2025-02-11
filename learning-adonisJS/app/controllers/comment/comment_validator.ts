@@ -25,6 +25,6 @@ export const DeleteCommentValidator = vine.compile(
 
 export const AllCommentsByPostIdValidator = vine.compile(
   vine.object({
-    post_id: vine.number(),
+    postId: vine.number(),
   })
 )

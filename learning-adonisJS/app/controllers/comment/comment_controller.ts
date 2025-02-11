@@ -12,7 +12,7 @@ export default class CommentController {
     this.commentService = new CommentService()
   }
   public async allCommentsByPostId({ response, request }: HttpContext) {
-    request.all().post_id = request.param('postId')
+    // request.all().post_id = request.param('postId')
     const payload = await request.validateUsing(AllCommentsByPostIdValidator)
     const comments = await this.commentService.allCommentsByPostId(payload)
     return response.send(comments)
