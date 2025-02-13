@@ -1077,6 +1077,9 @@ AdonisJS creates an instance of the HttpContext class for every incoming HTTP re
 ### **Middleware**
 
 The middleware pipeline in AdonisJS is an implementation of Chain of Responsibility design pattern. You can use middleware to intercept HTTP requests and respond to them before they reach the route handler.
+- define guard in /config/auth.ts 
+- create named middleware in /middleware directory
+- add the named middleware in /start/kernel.ts file under named middlware
 
 ### ✅ **Backend Validation, Authentication, and Authorization Serial with Example**
 
@@ -1468,6 +1471,9 @@ query -> service -> validator -> controller -> router
 get -> for fetching data. Can get the request data from ctx params
 post -> for CRUD operations. Can get the request data from ctx body
 
+# Middleware
+
+
 # Lucid query
 
 ```sql
@@ -1516,3 +1522,4 @@ Here, one user can have many posts. user_id of user model is the foreign key of 
 | **Foreign Key**  | Defined in the related model          | Defined in the current model     |
 
 ---
+
