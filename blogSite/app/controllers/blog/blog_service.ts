@@ -8,8 +8,8 @@ export default class BlogService {
   async createBlog(data: {
     title: string
     author_id: number
+    author_name: string
     content: string
-    like_count: number
     is_private: boolean
     image_url: string
     estimate_reading_time: number
@@ -17,8 +17,8 @@ export default class BlogService {
     return await this.blogQuery.createBlog(
       data.title,
       data.author_id,
+      data.author_name,
       data.content,
-      data.like_count,
       data.is_private,
       data.image_url,
       data.estimate_reading_time
@@ -26,5 +26,33 @@ export default class BlogService {
   }
   async getAllBlog() {
     return await this.blogQuery.getAllBlog()
+  }
+  async getFilteredBlogs(searchTerm: string) {
+    return await this.blogQuery.getFilteredBlogs(searchTerm)
+  }
+
+  async getBlogsByUserId(userId: number) {
+    return await this.blogQuery.getBlogsByUserId(userId)
+  }
+  async getBlogByBlogId(blogId: number) {
+    return await this.blogQuery.getBlogByBlogId(blogId)
+  }
+  async deleteBlog(blogId: number) {
+    return await this.blogQuery.deleteBlog(blogId)
+  }
+  async updateBlog(
+    blogId: number,
+    title: string,
+    content: string,
+    is_private: boolean,
+    estimate_reading_time: number
+  ) {
+    return await this.blogQuery.updateBlog(
+      blogId,
+      title,
+      content,
+      is_private,
+      estimate_reading_time
+    )
   }
 }

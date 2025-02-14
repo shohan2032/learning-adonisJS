@@ -17,6 +17,9 @@ export default class Blog extends BaseModel {
   declare author_id: number
 
   @column()
+  declare author_name: string
+
+  @column()
   declare content: string
 
   @column()
