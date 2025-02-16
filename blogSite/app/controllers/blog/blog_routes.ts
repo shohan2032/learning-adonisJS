@@ -14,5 +14,17 @@ router
       .middleware(middleware.auth())
     router.post('edit-blog', [BlogController, 'editBlogByBlogId']).middleware(middleware.auth())
     router.get('/blog-by-id', [BlogController, 'getBlogByBlogId'])
+    router
+      .post('/increment-like-count', [BlogController, 'incrementLikeCount'])
+      .middleware(middleware.auth())
+    router
+      .post('/decrement-like-count', [BlogController, 'decrementLikeCount'])
+      .middleware(middleware.auth())
+    router
+      .get('/all-favorites', [BlogController, 'getAllFavoritesByUserId'])
+      .middleware(middleware.auth())
+    router
+      .get('/last-ten-liked-blogs', [BlogController, 'getLastTenLikedBlogsByUserId'])
+      .middleware(middleware.auth())
   })
   .prefix('api/blog')

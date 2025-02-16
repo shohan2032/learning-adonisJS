@@ -55,4 +55,16 @@ export default class BlogService {
       estimate_reading_time
     )
   }
+  async incrementLikeCount(blogId: number) {
+    await this.blogQuery.incrementLikeCount(blogId)
+  }
+  async decrementLikeCount(blogId: number) {
+    await this.blogQuery.decrementLikeCount(blogId)
+  }
+  async getAllFavoritesByUserId(user_id: number) {
+    return await this.blogQuery.getAllFavoritesByUserId(user_id)
+  }
+  async getLastTenLikedBlogsByUserId(user_id: number) {
+    return await this.blogQuery.getLastTenLikedBlogsByUserId(user_id)
+  }
 }

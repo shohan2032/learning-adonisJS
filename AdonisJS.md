@@ -1523,3 +1523,4 @@ Here, one user can have many posts. user_id of user model is the foreign key of 
 
 ---
 
+

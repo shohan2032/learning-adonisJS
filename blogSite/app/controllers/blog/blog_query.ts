@@ -61,4 +61,39 @@ export default class BlogQuery {
     await blog.save()
     return blog
   }
+  public async incrementLikeCount(blogId: number) {
+    const blog = await Blog.findOrFail(blogId)
+    blog.like_count++
+    await blog.save()
+  }
+  public async decrementLikeCount(blogId: number) {
+    const blog = await Blog.findOrFail(blogId)
+    blog.like_count--
+    await blog.save()
+  }
+  public async getAllFavoritesByUserId(userId: number) {
+    const favoriteBlogs = await Blog.query()
+      .whereHas('favorites', (query) => {
+        query.where('user_id', userId)
+      })
+      .preload('favorites', (favQuery) => {
+        favQuery.where('user_id', userId)
+      })
+      .orderBy('created_at', 'desc')
+
+    console.log(favoriteBlogs)
+    return favoriteBlogs
+  }
+  public async getLastTenLikedBlogsByUserId(userId: number) {
+    const blogs = await Blog.query()
+      .whereHas('likes', (query) => {
+        query.where('user_id', userId)
+      })
+      .preload('likes', (likeQuery) => {
+        likeQuery.where('user_id', userId)
+      })
+      .orderBy('created_at', 'desc')
+      .limit(10)
+    return blogs
+  }
 }

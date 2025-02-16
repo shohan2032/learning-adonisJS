@@ -10,7 +10,8 @@
 import router from '@adonisjs/core/services/router'
 import '../app/controllers/auth/auth_routes.js'
 import '../app/controllers/blog/blog_routes.js'
-
+import '../app/controllers/like/like_routes.js'
+import '../app/controllers/favorite/favorite_routes.js'
 router.get('/', async () => {
   return {
     hello: 'world',

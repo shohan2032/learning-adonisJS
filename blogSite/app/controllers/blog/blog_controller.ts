@@ -6,6 +6,10 @@ import {
   DeleteBlogValidator,
   UpdateBlogValidator,
   GetBlogByBlogIdValidator,
+  IncrementLikeCountValidator,
+  DecrementLikeCountValidator,
+  GetAllFavoritesByUserIdValidator,
+  GetLastTenLikedBlogsByUserIdValidator,
 } from './blog_validator.js'
 import { HttpContext } from '@adonisjs/core/http'
 
@@ -121,6 +125,54 @@ export default class BlogController {
     } catch (error) {
       return response.internalServerError({
         message: 'Failed to update blog!',
+        error: error.message,
+      })
+    }
+  }
+  public async incrementLikeCount({ request, response }: HttpContext) {
+    try {
+      const payload = await request.validateUsing(IncrementLikeCountValidator)
+      await this.blogService.incrementLikeCount(payload.blog_id)
+      return response.ok({ message: 'Like count incremented successfully' })
+    } catch (error) {
+      return response.internalServerError({
+        message: 'Failed to increment like count!',
+        error: error.message,
+      })
+    }
+  }
+  public async decrementLikeCount({ request, response }: HttpContext) {
+    try {
+      const payload = await request.validateUsing(DecrementLikeCountValidator)
+      await this.blogService.decrementLikeCount(payload.blog_id)
+      return response.ok({ message: 'Like count decremented successfully' })
+    } catch (error) {
+      return response.internalServerError({
+        message: 'Failed to decrement like count!',
+        error: error.message,
+      })
+    }
+  }
+  public async getAllFavoritesByUserId({ request, response }: HttpContext) {
+    try {
+      const payload = await request.validateUsing(GetAllFavoritesByUserIdValidator)
+      const blogs = await this.blogService.getAllFavoritesByUserId(payload.user_id)
+      return response.ok(blogs)
+    } catch (error) {
+      return response.internalServerError({
+        message: 'Failed to fetch favorites!',
+        error: error.message,
+      })
+    }
+  }
+  public async getLastTenLikedBlogsByUserId({ request, response }: HttpContext) {
+    try {
+      const payload = await request.validateUsing(GetLastTenLikedBlogsByUserIdValidator)
+      const blogs = await this.blogService.getLastTenLikedBlogsByUserId(payload.user_id)
+      return response.ok(blogs)
+    } catch (error) {
+      return response.internalServerError({
+        message: 'Failed to fetch last ten liked blogs!',
         error: error.message,
       })
     }

@@ -47,3 +47,29 @@ export const DeleteBlogValidator = vine.compile(
     authorId: vine.number(),
   })
 )
+
+export const IncrementLikeCountValidator = vine.compile(
+  vine.object({
+    user_id: vine.number(),
+    blog_id: vine.number(),
+  })
+)
+
+export const DecrementLikeCountValidator = vine.compile(
+  vine.object({
+    user_id: vine.number(),
+    blog_id: vine.number(),
+  })
+)
+
+export const GetAllFavoritesByUserIdValidator = vine.compile(
+  vine.object({
+    user_id: vine.number(),
+  })
+)
+
+export const GetLastTenLikedBlogsByUserIdValidator = vine.compile(
+  vine.object({
+    user_id: vine.number(),
+  })
+)
