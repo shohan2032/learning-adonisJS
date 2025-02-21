@@ -1077,7 +1077,8 @@ AdonisJS creates an instance of the HttpContext class for every incoming HTTP re
 ### **Middleware**
 
 The middleware pipeline in AdonisJS is an implementation of Chain of Responsibility design pattern. You can use middleware to intercept HTTP requests and respond to them before they reach the route handler.
-- define guard in /config/auth.ts 
+
+- define guard in /config/auth.ts
 - create named middleware in /middleware directory
 - add the named middleware in /start/kernel.ts file under named middlware
 
@@ -1461,6 +1462,8 @@ If you're building an API:
 - **Use Query Strings** for **GET** requests (retrieving data).
 - **Use Request Body** for **POST/PUT/PATCH** requests (sending data).
 
+## Note this sequence
+
 query -> service
 service -> controller
 validator -> controller
@@ -1471,8 +1474,155 @@ query -> service -> validator -> controller -> router
 get -> for fetching data. Can get the request data from ctx params
 post -> for CRUD operations. Can get the request data from ctx body
 
-# Middleware
+### Query.ts
 
+```javascript
+import Blog from '#models/blog'
+
+export default class BlogQuery {
+
+  public async getAllBlog() {
+    return await Blog.query().where('is_private', false).orderBy('created_at', 'desc')
+  }
+}
+
+```
+
+### Service.ts
+
+```javascript
+import BlogQuery from './blog_query.js'
+
+export default class BlogService {
+  private blogQuery: BlogQuery
+  constructor() {
+    this.blogQuery = new BlogQuery()
+  }
+  async createBlog(data: {
+    title: string
+    author_id: number
+    author_name: string
+    content: string
+    is_private: boolean
+    image_url: string
+    estimate_reading_time: number
+  }) {
+    return await this.blogQuery.createBlog(
+      data.title,
+      data.author_id,
+      data.author_name,
+      data.content,
+      data.is_private,
+      data.image_url,
+      data.estimate_reading_time
+    )
+  }
+  async getAllBlog() {
+    return await this.blogQuery.getAllBlog()
+  }
+  async getFilteredBlogs(searchTerm: string) {
+    return await this.blogQuery.getFilteredBlogs(searchTerm)
+  }
+
+  async getBlogsByUserId(userId: number) {
+    return await this.blogQuery.getBlogsByUserId(userId)
+  }
+  async getBlogByBlogId(blogId: number) {
+    return await this.blogQuery.getBlogByBlogId(blogId)
+  }
+  async deleteBlog(blogId: number) {
+    return await this.blogQuery.deleteBlog(blogId)
+  }
+  async updateBlog(
+    blogId: number,
+    title: string,
+    content: string,
+    is_private: boolean,
+    estimate_reading_time: number
+  ) {
+    return await this.blogQuery.updateBlog(
+      blogId,
+      title,
+      content,
+      is_private,
+      estimate_reading_time
+    )
+  }
+}
+
+```
+
+### Validator.ts Example:
+
+```javascript
+import vine from "@vinejs/vine";
+
+export const UpdateBlogValidator = vine.compile(
+  vine.object({
+    blog_id: vine.number(),
+    title: vine.string(),
+    author_id: vine.number(),
+    content: vine.string(),
+    is_private: vine.boolean(),
+    estimate_reading_time: vine.number(),
+  })
+);
+```
+
+### Controller.ts
+
+```javascript
+import BlogService from './blog_service.js'
+import {
+  CreateBlogValidator,
+} from './blog_validator.js'
+import { HttpContext } from '@adonisjs/core/http'
+
+export default class BlogController {
+  private blogService: BlogService
+  constructor() {
+    this.blogService = new BlogService()
+  }
+  public async createBlog({ response, request }: HttpContext) {
+    try {
+      const payload = await request.validateUsing(CreateBlogValidator)
+      console.log('🚀 ~ BlogController ~ createBlog ~ payload:', payload)
+      const blog = await this.blogService.createBlog(payload)
+      // console.log('🚀 ~ BlogController ~ createBlog ~ blog:', blog)
+      return response.status(201).send(blog)
+    } catch (err) {
+      return response.internalServerError({
+        message: 'Failed to create blog',
+        error: err.message,
+      })
+    }
+  }
+}
+
+```
+
+### Route.ts Example:
+
+```javascript
+import router from "@adonisjs/core/services/router";
+import EzyNumberController from "./EzyNumberController.js";
+import { middleware } from "#start/kernel";
+router
+  .group(() => {
+    router.get("ezyNumbers", [EzyNumberController, "ezyNumbers"]);
+    router.get("monthly-sites-report", [
+      EzyNumberController,
+      "getMonthlySitesReport",
+    ]); // for graph
+    router.get("available-years", [EzyNumberController, "getAvailableYears"]); // for available years. it is used for graph
+    router.get("monthly-sites-details", [
+      EzyNumberController,
+      "getMonthlyMomDetails",
+    ]); // for mom details
+  })
+  .prefix("admin/ezynumber")
+  .use(middleware.superAdmin());
+```
 
 # Lucid query
 
@@ -1522,5 +1672,3 @@ Here, one user can have many posts. user_id of user model is the foreign key of 
 | **Foreign Key**  | Defined in the related model          | Defined in the current model     |
 
 ---
-
-
